@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <libpkgstate-build/export.h>
+
 #include <cstdint>
 #include <stdexcept>
 #include <string>
@@ -25,7 +27,7 @@ enum class projection_error_code : std::uint8_t {
   identity_translation = 5,
 };
 
-class projection_error final : public std::invalid_argument {
+class PKGSTATE_BUILD_API projection_error final : public std::invalid_argument {
 public:
   projection_error(projection_error_code code, std::string message);
   [[nodiscard]] projection_error_code code() const noexcept;
@@ -35,7 +37,7 @@ private:
 
 
 /*! \brief Source-bound build authority admitted by this adapter. */
-class build_authority final {
+class PKGSTATE_BUILD_API build_authority final {
 public:
   [[nodiscard]] const package_source_record& source() const noexcept;
   [[nodiscard]] const build_provenance& provenance() const noexcept;
@@ -44,7 +46,7 @@ private:
                   build_provenance provenance);
   package_source_record source_;
   build_provenance provenance_;
-  friend build_authority project_build(
+  friend PKGSTATE_BUILD_API build_authority project_build(
       const package_source_record& source,
       const pkgbuild::build_result& build,
       const pkgimage::inspected_package_image& image);
@@ -57,7 +59,7 @@ private:
  * exact artifact bytes and match the complete ordered build payload. No
  * planner, application, filesystem, or store authority is created here.
  */
-[[nodiscard]] build_authority project_build(
+[[nodiscard]] PKGSTATE_BUILD_API build_authority project_build(
     const package_source_record& source,
     const pkgbuild::build_result& build,
     const pkgimage::inspected_package_image& image);

@@ -1,5 +1,21 @@
 # Integration
 
-Link `libpkgstate-build` only at the composition point that must cross this exact authority boundary. The adapter returns immutable values and performs no hidden I/O.
+Call `project_build()` only after the build result has completed successfully
+and the exact retained artifact bytes have been independently inspected by
+`libpkgimage`.
 
-The repository requires the 3.0 `libpkgstate` owner generation. It must be released after its authority dependencies and before any orchestrator that consumes the bridge.
+```text
+libpkgstate-source record ----+
+                              |
+libpkgbuild result ------------+--> libpkgstate-build --> build_authority
+                              |
+libpkgimage inspection --------+
+```
+
+Do not replace the inspection with archive filenames, package coordinates, or
+planner candidate identity. `build_authority` is intended for the later
+application-admission boundary; it performs no target mutation or state I/O.
+
+Release after `libpkgstate` 3.0.0, `libpkgsource` 3.0.0, `libpkgimage` 0.4.0,
+`libpkgbuild` 2.0.0, and `libpkgstate-source` 3.0.0. Release before
+`libpkgstate-apply`.
