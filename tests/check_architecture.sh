@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: 2026 Alexandr Savca
+# SPDX-License-Identifier: GPL-3.0-or-later
+set -eu
+root=$1
+fail(){ echo "architecture-contract: $*" >&2; exit 1; }
+if grep -R -F 'libpkgplan' "$root/include" "$root/src" "$root/meson.build" "$root/src/meson.build" >/dev/null 2>&1; then fail 'forbidden authority dependency: libpkgplan'; fi
+if grep -R -F 'libpkgapply' "$root/include" "$root/src" "$root/meson.build" "$root/src/meson.build" >/dev/null 2>&1; then fail 'forbidden authority dependency: libpkgapply'; fi
+grep -F 'package_source_record + successful build + inspected image -> build_authority' "$root/docs/architecture.md" >/dev/null || fail 'authority flow is undocumented'
