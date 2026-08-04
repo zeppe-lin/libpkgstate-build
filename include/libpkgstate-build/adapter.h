@@ -43,7 +43,10 @@ public:
   /*! \brief Destroy the polymorphic projection failure. */
   ~projection_error() override;
 
-  /*! \brief Return the stable refusal category. */
+  /*!
+   * \brief Return the stable refusal category.
+  *  \return The stable refusal category.
+   */
   [[nodiscard]] projection_error_code code() const noexcept;
 
 private:
@@ -59,9 +62,15 @@ private:
  */
 class PKGSTATE_BUILD_API build_authority final {
 public:
-  /*! \brief Return the request-bound durable source record. */
+  /*!
+   * \brief Return the request-bound durable source record.
+  *  \return The request-bound durable source record.
+   */
   [[nodiscard]] const package_source_record& source() const noexcept;
-  /*! \brief Return the exact admitted build provenance. */
+  /*!
+   * \brief Return the exact admitted build provenance.
+  *  \return The exact admitted build provenance.
+   */
   [[nodiscard]] const build_provenance& provenance() const noexcept;
 
 private:
