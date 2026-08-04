@@ -1,0 +1,54 @@
+% LIBPKGSTATE-BUILD(3) libpkgstate-build | Version 3.0.0
+
+<!-- Generated from libpkgstate-build.3.scdoc; do not edit. -->
+
+
+# NAME
+
+libpkgstate-build - admit verified native build authority into installed state
+
+# SYNOPSIS
+
+**#include <libpkgstate-build/adapter.h>**
+
+# DESCRIPTION
+
+**project_build()** accepts one successful sealed **libpkgbuild** result and
+one independently inspected **libpkgimage**. It derives the exact
+**package_source_record** from the build request's sealed source snapshot and
+selected build and target architectures, then returns an immutable
+**build_authority** value for later application admission. It performs no
+filesystem application or state publication.
+
+The adapter verifies that:
+
+- request-bound source authority projects into one valid state source record;
+- the build result is complete and successful;
+- the inspected archive digest equals the exact sealed artifact-byte digest;
+- the image inspection receipt binds the supplied image and entry count; and
+- every normalized image entry equals the ordered build payload entry, including
+  type, mode, ownership, size, timestamp, content, links, and device data.
+
+Build authority is admitted only after exact artifact inspection.
+
+# RETAINED AUTHORITY
+
+The resulting provenance retains typed identities for the source record, build
+request, verified source-material set, materialized build-input set, environment
+policy, build policy, build result, payload manifest, sealed artifact, exact
+artifact content, artifact binding, execution evidence, normalized artifact
+image, and inspection receipt.
+
+The adapter does not derive build authority from planner candidates, package
+filenames, archive labels, or mutable build directories.
+
+# ERRORS
+
+**projection_error** classifies incomplete or failed results, source-projection
+failure, artifact-byte mismatch, inspection mismatch, payload mismatch, and
+vocabulary or construction failures.
+
+# SEE ALSO
+
+**libpkgbuild**(3), **libpkgimage**(3), **libpkgstate-source**(3),
+**libpkgstate-apply**(3), **pkgstate_model**(3)
