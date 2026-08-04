@@ -75,7 +75,9 @@ inline pkgsource::source_snapshot source()
           architecture_requirements(
               {architecture_reference("x86_64")},
               {architecture_reference("x86_64")}),
-          at("recipe.yml", "$", 1)),
+          at("recipe.yml", "$", 1),
+          program(program_language::posix_shell,
+                  "meson test -C build\n")),
       profiles());
 }
 
