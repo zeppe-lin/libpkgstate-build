@@ -10,15 +10,16 @@ pkgstate_build_adapter - admit verified native build authority into installed st
 
 # DESCRIPTION
 
-*project_build()* accepts one exact *package_source_record*, one successful
-sealed *libpkgbuild* result, and one independently inspected *libpkgimage*.
-It returns an immutable *build_authority* value for later application admission.
-It performs no filesystem application or state publication.
+*project_build()* accepts one successful sealed *libpkgbuild* result and
+one independently inspected *libpkgimage*. It derives the exact
+*package_source_record* from the build request's sealed source snapshot and
+selected build and target architectures, then returns an immutable
+*build_authority* value for later application admission. It performs no
+filesystem application or state publication.
 
 The adapter verifies that:
 
-- the state source record is the exact projection of the build request's sealed
-  source snapshot and architecture selections;
+- request-bound source authority projects into one valid state source record;
 - the build result is complete and successful;
 - the inspected archive digest equals the exact sealed artifact-byte digest;
 - the image inspection receipt binds the supplied image and entry count; and
@@ -40,9 +41,9 @@ filenames, archive labels, or mutable build directories.
 
 # ERRORS
 
-*projection_error* classifies incomplete or failed results, source-record drift,
-artifact-byte mismatch, inspection mismatch, payload mismatch, and vocabulary or
-construction failures.
+*projection_error* classifies incomplete or failed results, source-projection
+failure, artifact-byte mismatch, inspection mismatch, payload mismatch, and
+vocabulary or construction failures.
 
 # SEE ALSO
 

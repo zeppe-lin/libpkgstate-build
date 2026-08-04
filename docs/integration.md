@@ -5,15 +5,13 @@ and the exact retained artifact bytes have been independently inspected by
 `libpkgimage`.
 
 ```text
-libpkgstate-source record ----+
-                              |
 libpkgbuild result ------------+--> libpkgstate-build --> build_authority
-                              |
-libpkgimage inspection --------+
+  `- sealed source request -----|          |
+libpkgimage inspection --------+          `- derived package_source_record
 ```
 
-Do not replace the inspection with archive filenames, package coordinates, or
-planner candidate identity. `build_authority` is intended for the later
+Do not supply a second source record and do not replace the inspection with
+archive filenames, package coordinates, or planner candidate identity. `build_authority` is intended for the later
 application-admission boundary; it performs no target mutation or state I/O.
 
 Release after `libpkgstate` 3.0.0, `libpkgsource` 3.0.0, `libpkgimage` 0.4.0,

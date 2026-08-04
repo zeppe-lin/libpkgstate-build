@@ -151,30 +151,20 @@ void verify_payload(const pkgbuild::payload_manifest& expected,
     verify_entry(expected.entries()[index], observed.entries()[index]);
 }
 
-void verify_source(const package_source_record& source,
-                   const pkgbuild::build_request& request)
+package_source_record project_source(const pkgbuild::build_request& request)
 {
-  package_source_record expected = [&] {
-    try
-    {
-      return source_adapter::project_source(
-          request.source(), request.architectures().build(),
-          request.architectures().target());
-    }
-    catch (const source_adapter::projection_error& error)
-    {
-      throw projection_error(
-          projection_error_code::source_binding,
-          std::string("cannot derive state source authority from build: ") +
-              error.what());
-    }
-  }();
-
-  if (source != expected)
+  try
+  {
+    return source_adapter::project_source(
+        request.source(), request.architectures().build(),
+        request.architectures().target());
+  }
+  catch (const source_adapter::projection_error& error)
   {
     throw projection_error(
         projection_error_code::source_binding,
-        "state source record differs from the build request source authority");
+        std::string("cannot derive state source authority from build: ") +
+            error.what());
   }
 }
 
@@ -211,7 +201,6 @@ const build_provenance& build_authority::provenance() const noexcept
 }
 
 build_authority project_build(
-    const package_source_record& source,
     const pkgbuild::build_result& build,
     const pkgimage::inspected_package_image& image)
 {
@@ -224,7 +213,7 @@ build_authority project_build(
         "state admission requires a complete successful build result");
   }
 
-  verify_source(source, build.request());
+  package_source_record source = project_source(build.request());
 
   const std::string expected_digest =
       "v1:sha256:" + build.artifact()->complete_digest().hex();
@@ -250,31 +239,31 @@ build_authority project_build(
         source,
         build_provenance(
             source.identity(),
-        translate_build_identity<build_request_identity>(
-            build.request().identity()),
-        translate_build_identity<source_material_set_identity>(
-            build.request().sources().identity()),
-        translate_build_identity<build_input_set_identity>(
-            build.request().inputs().identity()),
-        translate_build_identity<environment_policy_identity>(
-            build.request().policy().environment().identity()),
-        translate_build_identity<build_policy_identity>(
-            build.request().policy().identity()),
-        translate_build_identity<build_result_identity>(build.identity()),
-        translate_build_identity<payload_manifest_identity>(
-            build.payload()->identity()),
-        translate_build_identity<build_artifact_identity>(
-            build.artifact()->identity()),
-        translate_external_identity<artifact_content_identity>(
-            image.receipt().archive_digest()),
-        translate_build_identity<artifact_binding_identity>(
-            *build.artifact_binding()),
-        translate_build_identity<execution_evidence_identity>(
-            build.execution_evidence()),
-        translate_external_identity<artifact_image_identity>(
-            image.image().identity()),
-        translate_external_identity<artifact_inspection_identity>(
-            image.receipt().identity())));
+            translate_build_identity<build_request_identity>(
+                build.request().identity()),
+            translate_build_identity<source_material_set_identity>(
+                build.request().sources().identity()),
+            translate_build_identity<build_input_set_identity>(
+                build.request().inputs().identity()),
+            translate_build_identity<environment_policy_identity>(
+                build.request().policy().environment().identity()),
+            translate_build_identity<build_policy_identity>(
+                build.request().policy().identity()),
+            translate_build_identity<build_result_identity>(build.identity()),
+            translate_build_identity<payload_manifest_identity>(
+                build.payload()->identity()),
+            translate_build_identity<build_artifact_identity>(
+                build.artifact()->identity()),
+            translate_external_identity<artifact_content_identity>(
+                image.receipt().archive_digest()),
+            translate_build_identity<artifact_binding_identity>(
+                *build.artifact_binding()),
+            translate_build_identity<execution_evidence_identity>(
+                build.execution_evidence()),
+            translate_external_identity<artifact_image_identity>(
+                image.image().identity()),
+            translate_external_identity<artifact_inspection_identity>(
+                image.receipt().identity())));
   }
   catch (const projection_error&)
   {

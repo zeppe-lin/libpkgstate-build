@@ -3,7 +3,7 @@
 `libpkgstate-build` provides successful build and package-image admission into durable state provenance.
 
 ```text
-package_source_record + successful build + inspected image -> build_authority
+request-bound successful build + inspected image -> build_authority
 ```
 
 It is a translation boundary, not a second authority. It performs no source discovery, dependency resolution, build or application execution, target mutation, state publication, migration, or compatibility import beyond the exact operation documented in `docs/architecture.md`.

@@ -47,20 +47,19 @@ private:
   package_source_record source_;
   build_provenance provenance_;
   friend PKGSTATE_BUILD_API build_authority project_build(
-      const package_source_record& source,
       const pkgbuild::build_result& build,
       const pkgimage::inspected_package_image& image);
 };
 
 /*! \brief Retain one verified successful build as native state provenance.
  *
- * The source record must be the exact libpkgstate-source projection of the
- * build request's sealed source snapshot. The inspected image must name the
- * exact artifact bytes and match the complete ordered build payload. No
+ * Source authority is derived only from the sealed source snapshot and exact
+ * architecture selections retained by the build request. The inspected image
+ * must name the exact artifact bytes and match the complete ordered build
+ * payload. No parallel caller-supplied source record is accepted, and no
  * planner, application, filesystem, or store authority is created here.
  */
 [[nodiscard]] PKGSTATE_BUILD_API build_authority project_build(
-    const package_source_record& source,
     const pkgbuild::build_result& build,
     const pkgimage::inspected_package_image& image);
 

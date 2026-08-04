@@ -14,8 +14,7 @@ void retains_complete_build_authority()
   const pkgbuild::build_result build = build_fixture::result();
   const pkgimage::inspected_package_image image = build_fixture::inspected();
   const pkgstate::build_adapter::build_authority authority =
-      pkgstate::build_adapter::project_build(
-          build_fixture::state_source(), build, image);
+      pkgstate::build_adapter::project_build(build, image);
   const pkgstate::build_provenance& provenance = authority.provenance();
   TEST_EQ(authority.source(), build_fixture::state_source());
 
@@ -56,26 +55,18 @@ void rejects_failed_or_incomplete_builds()
       pkgbuild::failure_evidence_identity::from_sha256(std::string(64, '8')));
   TEST_THROWS(pkgstate::build_adapter::projection_error,
               pkgstate::build_adapter::project_build(
-                  build_fixture::state_source(), failed,
-                  build_fixture::inspected()));
+                  failed, build_fixture::inspected()));
 }
 
 void rejects_mismatched_authorities()
 {
   TEST_THROWS(pkgstate::build_adapter::projection_error,
               pkgstate::build_adapter::project_build(
-                  native_fixture::source("other", 80),
-                  build_fixture::result(), build_fixture::inspected()));
+                  build_fixture::result(), build_fixture::inspected('2')));
 
   TEST_THROWS(pkgstate::build_adapter::projection_error,
               pkgstate::build_adapter::project_build(
-                  build_fixture::state_source(), build_fixture::result(),
-                  build_fixture::inspected('2')));
-
-  TEST_THROWS(pkgstate::build_adapter::projection_error,
-              pkgstate::build_adapter::project_build(
-                  build_fixture::state_source(), build_fixture::result(),
-                  build_fixture::inspected('1', 0644)));
+                  build_fixture::result(), build_fixture::inspected('1', 0644)));
 }
 
 } // namespace

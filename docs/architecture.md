@@ -19,11 +19,11 @@ name as evidence.
 
 ## Admission invariants
 
-`project_build()` first reconstructs the source projection from the exact sealed
-source snapshot and architecture selections retained by the build request. The
-reconstructed record must equal the caller-supplied `package_source_record`.
-This makes source admission reproducible while keeping `libpkgstate-source` the
-single translation implementation.
+`project_build()` derives the source projection from the exact sealed source
+snapshot and architecture selections retained by the build request. It accepts
+no parallel caller-supplied source record. `libpkgstate-source` remains the
+single translation implementation, while the build bridge owns the composition
+of that source record with verified build and image evidence.
 
 The build result must be complete and successful. Its sealed artifact digest
 must identify the exact archive bytes inspected by `libpkgimage`. The
@@ -46,7 +46,8 @@ exports disagreement rather than choosing between authorities.
 
 `libpkgstate`, `libpkgbuild`, and `libpkgimage` are public because their types
 occur in installed declarations. `libpkgstate-source` is implementation-only:
-it is private for shared consumers and retained only in the static link closure.
+it derives the request-bound source record and remains private for shared
+consumers while being retained in the static link closure.
 
 The implementation body and behavior test are byte-for-byte extractions from
 `libpkgstate` 2.5.1. Header normalization is limited to the independent export
