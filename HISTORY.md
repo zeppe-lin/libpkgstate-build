@@ -9,3 +9,4 @@
 - Completed the documented public projection contract under Doxygen warnings-as-errors.
 - Renamed the installed manual from the former in-tree adapter name to `libpkgstate-build.3`.
 - Removed the redundant caller-supplied source record; source admission is now derived only from the exact build request.
+- Updated qualification fixtures for `libpkgsource` 3.0 sealing and package-source-record protocol version 2.

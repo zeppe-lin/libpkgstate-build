@@ -42,7 +42,7 @@ inline pkgsource::source_snapshot source()
 {
   using namespace pkgsource;
   return seal_source(
-      source_origin("recipe.yml"), source_syntax::recipe_yaml_v1,
+      source_origin("recipe.yml"),
       recipe_declaration(
           package_release(package_reference("example"), "1.2.3", 1),
           package_metadata("Example", std::nullopt,
