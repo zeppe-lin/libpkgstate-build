@@ -2,11 +2,10 @@
 
 ## Authority flow
 
-Contract shorthand: `package_source_record + successful build + inspected image -> build_authority`.
+Contract shorthand: `request-bound successful build + inspected image -> build_authority`.
 
 ```text
-package_source_record
-+ complete successful libpkgbuild result
+complete successful libpkgbuild result
 + independently inspected libpkgimage
                     |
                     v
@@ -49,6 +48,7 @@ occur in installed declarations. `libpkgstate-source` is implementation-only:
 it derives the request-bound source record and remains private for shared
 consumers while being retained in the static link closure.
 
-The implementation body and behavior test are byte-for-byte extractions from
-`libpkgstate` 2.5.1. Header normalization is limited to the independent export
-annotation.
+The root commit records the exact 2.5.1 implementation and behavior test.
+The independent repository then removed the parallel source-record input and
+made request-bound source admission explicit without rewriting that extraction
+history.

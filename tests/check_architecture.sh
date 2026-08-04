@@ -5,7 +5,7 @@ root=$1
 fail(){ echo "architecture-contract: $*" >&2; exit 1; }
 if grep -R -F 'libpkgplan' "$root/include" "$root/src" "$root/meson.build" "$root/src/meson.build" >/dev/null 2>&1; then fail 'forbidden authority dependency: libpkgplan'; fi
 if grep -R -F 'libpkgapply' "$root/include" "$root/src" "$root/meson.build" "$root/src/meson.build" >/dev/null 2>&1; then fail 'forbidden authority dependency: libpkgapply'; fi
-grep -F 'package_source_record + successful build + inspected image -> build_authority' "$root/docs/architecture.md" >/dev/null || fail 'authority flow is undocumented'
+grep -F 'request-bound successful build + inspected image -> build_authority' "$root/docs/architecture.md" >/dev/null || fail 'authority flow is undocumented'
 grep -F "gnu_symbol_visibility: 'hidden'" "$root/src/meson.build" >/dev/null || fail 'hidden visibility is not enforced'
 test -s "$root/abi/libpkgstate-build.exports" || fail 'reviewed export manifest is absent'
 grep -F "version: '>=0.4.0'" "$root/meson.build" >/dev/null || fail 'libpkgimage floor is not 0.4.0'
