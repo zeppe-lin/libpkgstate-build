@@ -1,8 +1,8 @@
-PKGSTATE_BUILD_ADAPTER(3)
+LIBPKGSTATE-BUILD(3)
 
 # NAME
 
-pkgstate_build_adapter - admit verified native build authority into installed state
+libpkgstate-build - admit verified native build authority into installed state
 
 # SYNOPSIS
 
@@ -47,5 +47,5 @@ vocabulary or construction failures.
 
 # SEE ALSO
 
-*libpkgbuild*(3), *libpkgimage*(3), *pkgstate_source_adapter*(3),
-*pkgstate_apply_adapter*(3), *pkgstate_model*(3)
+*libpkgbuild*(3), *libpkgimage*(3), *libpkgstate-source*(3),
+*libpkgstate-apply*(3), *pkgstate_model*(3)

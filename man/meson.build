@@ -3,9 +3,9 @@
 scdoc = find_program('scdoc', required: get_option('man_pages'))
 if scdoc.found()
   manual = custom_target(
-    'pkgstate_build_adapter.3',
-    input: 'pkgstate_build_adapter.3.scdoc',
-    output: 'pkgstate_build_adapter.3',
+    'libpkgstate-build.3',
+    input: 'libpkgstate-build.3.scdoc',
+    output: 'libpkgstate-build.3',
     command: [scdoc],
     capture: true,
     install: true,
