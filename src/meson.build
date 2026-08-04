@@ -62,6 +62,10 @@ pkgconf.generate(
   filebase: 'libpkgstate-build',
   description: 'Admission of verified libpkgbuild authority into libpkgstate',
   subdirs: '.',
-  requires: [libpkgstate_dep, libpkgbuild_dep, libpkgimage_dep],
-  requires_private: [libpkgstate_source_dep],
+  requires: [
+    'libpkgstate >= 3.0.0',
+    'libpkgbuild >= 2.0.0',
+    'libpkgimage >= 0.4.0',
+  ],
+  requires_private: ['libpkgstate-source >= 3.0.0'],
 )
