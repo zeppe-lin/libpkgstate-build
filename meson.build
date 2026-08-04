@@ -54,5 +54,6 @@ libpkgstate_source_dep = dependency(
 )
 
 subdir('src')
+subdir('docs')
 subdir('man')
 subdir('tests')
