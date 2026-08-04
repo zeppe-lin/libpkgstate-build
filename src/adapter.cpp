@@ -19,7 +19,7 @@ Target translate_build_identity(const Source& source)
   {
     return Target::parse(std::string("v1:sha256:") + source.hex());
   }
-  catch (const std::exception& error)
+  catch (const identity_error& error)
   {
     throw projection_error(
         projection_error_code::identity_translation,
@@ -34,7 +34,7 @@ Target translate_external_identity(const Source& source)
   {
     return Target::parse(source.string());
   }
-  catch (const std::exception& error)
+  catch (const identity_error& error)
   {
     throw projection_error(
         projection_error_code::identity_translation,
@@ -271,12 +271,12 @@ build_authority project_build(
   {
     throw;
   }
-  catch (const std::exception& error)
+  catch (const error& failure)
   {
     throw projection_error(
         projection_error_code::identity_translation,
         std::string("cannot construct native build provenance: ") +
-            error.what());
+            failure.what());
   }
 }
 

@@ -41,6 +41,13 @@ The adapter does not execute a build, inspect archive bytes, mutate a target,
 construct planner candidates, publish state, or recover missing evidence. It
 exports disagreement rather than choosing between authorities.
 
+## Failure translation
+
+The boundary translates only typed source-admission and `libpkgstate` model
+refusals. Allocation, logic, and unrelated runtime failures retain their native
+type. In particular, the adapter must not classify every `std::exception` as an
+identity or artifact disagreement.
+
 ## Dependency placement
 
 `libpkgstate`, `libpkgbuild`, and `libpkgimage` are public because their types

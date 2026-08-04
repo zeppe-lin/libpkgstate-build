@@ -9,3 +9,4 @@ grep -F 'request-bound successful build + inspected image -> build_authority' "$
 grep -F "gnu_symbol_visibility: 'hidden'" "$root/src/meson.build" >/dev/null || fail 'hidden visibility is not enforced'
 test -s "$root/abi/libpkgstate-build.exports" || fail 'reviewed export manifest is absent'
 grep -F "version: '>=0.4.0'" "$root/meson.build" >/dev/null || fail 'libpkgimage floor is not 0.4.0'
+if grep -R -F 'catch (const std::exception' "$root/src" >/dev/null; then fail 'adapter launders unrelated process failures through std::exception'; fi
