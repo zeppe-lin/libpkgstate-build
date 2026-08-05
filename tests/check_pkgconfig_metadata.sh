@@ -21,9 +21,19 @@ for spec in   'libpkgstate >= 3.0.0' 'libpkgstate < 4.0.0'   'libpkgbuild-image 
   set -- $spec
   has_requirement "$public" "$1" "$2" "$3" || { echo "pkgconfig-metadata: missing public $spec" >&2; exit 1; }
 done
+has_package() {
+  printf '%s
+' "$1" | tr ',' '
+' | awk -v package="$2" '
+      $1 == package { found = 1 }
+      END { exit found ? 0 : 1 }
+    '
+}
 for package in libpkgstate-source libpkgbuild libpkgimage; do
-  if printf '%s
-' "$public" | grep -F "$package" >/dev/null; then echo "pkgconfig-metadata: private/transitive edge leaked publicly: $package" >&2; exit 1; fi
+  if has_package "$public" "$package"; then
+    echo "pkgconfig-metadata: private/transitive edge leaked publicly: $package" >&2
+    exit 1
+  fi
 done
 for spec in 'libpkgstate-source >= 3.0.0' 'libpkgstate-source < 4.0.0'; do
   set -- $spec
