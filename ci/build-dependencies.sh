@@ -24,25 +24,16 @@ build_one()
 {
   name=$1
   shift
-  meson setup "$build_root/$name" "$source_root/$name" \
-    --wrap-mode=nofallback \
-    --prefix="$prefix" \
-    --libdir=lib \
-    --buildtype="${MESON_BUILDTYPE:-debug}" \
-    -Ddefault_library="$link_mode" \
-    -Dlink_mode="$link_mode" \
-    -Dtests=disabled \
-    -Dman_pages=disabled \
-    -Dwerror=true \
-    ${MESON_SANITIZE:+-Db_sanitize="$MESON_SANITIZE"} \
-    ${MESON_SANITIZE:+-Db_lundef=false} \
-    "$@"
+  meson setup "$build_root/$name" "$source_root/$name"     --wrap-mode=nofallback     --prefix="$prefix"     --libdir=lib     --buildtype="${MESON_BUILDTYPE:-debug}"     -Ddefault_library="$link_mode"     -Dlink_mode="$link_mode"     -Dtests=disabled     -Dman_pages=disabled     -Dwerror=true     ${MESON_SANITIZE:+-Db_sanitize="$MESON_SANITIZE"}     ${MESON_SANITIZE:+-Db_lundef=false}     "$@"
   meson compile -C "$build_root/$name"
   meson install -C "$build_root/$name"
 }
 
+build_one libpkgcatalog -Dhtml_docs=disabled
 build_one libpkgsource -Dhtml_docs=disabled
 build_one libpkgimage -Dhtml_docs=disabled
-build_one libpkgbuild -Dplanner_adapter=disabled
 build_one libpkgstate -Dtools=disabled
+build_one libpkgresolve
+build_one libpkgbuild
+build_one libpkgbuild-image
 build_one libpkgstate-source

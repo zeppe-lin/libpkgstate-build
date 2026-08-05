@@ -13,11 +13,19 @@ done
 for token in 'GCC shared' 'GCC static' 'Clang shared' 'Clang static' 'GCC release' 'address,undefined' 'meson==1.10.2' '--wrap-mode=nofallback'; do
   grep -F -- "$token" "$workflow" "$root/ci/configure-and-test.sh" "$root/ci/build-dependencies.sh" >/dev/null || fail "missing $token"
 done
-grep -F -- 'repository: zeppe-lin/libpkgstate-source' "$workflow" >/dev/null || fail 'missing dependency pin: repository: zeppe-lin/libpkgstate-source'
-grep -F -- 'repository: zeppe-lin/libpkgbuild' "$workflow" >/dev/null || fail 'missing dependency pin: repository: zeppe-lin/libpkgbuild'
-grep -F -- 'ref: v0.4.0' "$workflow" >/dev/null || fail 'missing dependency pin: ref: v0.4.0'
+for pin in   'zeppe-lin/libpkgcatalog|v3.0.0'   'zeppe-lin/libpkgsource|v3.0.0'   'zeppe-lin/libpkgimage|v0.4.0'   'zeppe-lin/libpkgstate|v3.0.0'   'zeppe-lin/libpkgresolve|v2.0.0'   'zeppe-lin/libpkgbuild|v3.0.0'   'zeppe-lin/libpkgbuild-image|v1.0.0'   'zeppe-lin/libpkgstate-source|v3.0.0'; do
+  repository=${pin%|*}
+  ref=${pin#*|}
+  grep -F "repository: $repository" "$workflow" >/dev/null || fail "missing dependency pin: $repository"
+  awk -v repo="$repository" -v ref="$ref" '
+    $0 ~ "repository: " repo { seen = 1; next }
+    seen && $0 ~ "ref: " ref { found = 1; exit }
+    seen && /repository:/ { exit }
+    END { exit found ? 0 : 1 }
+  ' "$workflow" || fail "wrong dependency ref: $repository $ref"
+done
 
-grep -F 'html: enabled' "$root/.github/workflows/ci.yml" >/dev/null || fail 'GCC shared HTML build is absent'
-grep -F 'pandoc' "$root/.github/workflows/ci.yml" >/dev/null || fail 'Pandoc qualification dependency is absent'
-grep -F -- '-Dhtml_docs=' "$root/.github/workflows/ci.yml" >/dev/null || fail 'HTML Meson feature is not configured'
-grep -F 'qualify-html-docs.sh' "$root/.github/workflows/ci.yml" >/dev/null || fail 'installed HTML qualification is absent'
+grep -F 'html: enabled' "$workflow" >/dev/null || fail 'GCC shared HTML build is absent'
+grep -F 'pandoc' "$workflow" >/dev/null || fail 'Pandoc qualification dependency is absent'
+grep -F -- '-Dhtml_docs=' "$workflow" >/dev/null || fail 'HTML Meson feature is not configured'
+grep -F 'qualify-html-docs.sh' "$workflow" >/dev/null || fail 'installed HTML qualification is absent'

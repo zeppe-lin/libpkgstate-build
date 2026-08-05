@@ -2,60 +2,42 @@
 
 ## Authority flow
 
-Contract shorthand: `request-bound successful build + inspected image -> build_authority`.
+Contract shorthand: `admitted build/image authority -> build_authority`.
 
 ```text
-complete successful libpkgbuild result
-+ independently inspected libpkgimage
+pkgbuild::image_adapter::build_image_authority
                     |
                     v
               build_authority
 ```
 
-`libpkgstate-build` admits build evidence into the durable provenance
-vocabulary. It does not make a build successful and does not treat an archive
-name as evidence.
+`libpkgbuild-image` already proves that one complete successful build result and one independently inspected package image describe the same exact artifact. `libpkgstate-build` does not repeat that proof. It translates the admitted pair into durable state vocabulary.
 
-## Admission invariants
+## Projection invariants
 
-`project_build()` derives the source projection from the exact sealed source
-snapshot and architecture selections retained by the build request. It accepts
-no parallel caller-supplied source record. `libpkgstate-source` remains the
-single translation implementation, while the build bridge owns the composition
-of that source record with verified build and image evidence.
+`project_build()` derives the source projection from the exact sealed source snapshot and architecture selections retained by the admitted build request. It accepts no parallel caller-supplied source record.
 
-The build result must be complete and successful. Its sealed artifact digest
-must identify the exact archive bytes inspected by `libpkgimage`. The
-inspection receipt must bind the supplied normalized image and its entry count.
-Finally, every ordered build-payload entry must equal the corresponding image
-entry across path, type, mode, ownership, size, timestamp, content digest, link
-target, and device data. Count or field drift is a typed refusal.
+The resulting provenance retains:
 
-A successful result retains source-record, request, material, policy, execution,
-payload, artifact, image, and inspection identities as one immutable
-`build_authority`.
+- the derived package-source-record identity;
+- logical build-request and resolver-backed build-input-set identities;
+- environment and build-policy identities;
+- successful result, payload, artifact, exact artifact-content, artifact-binding, and execution identities;
+- the build/image admission identity;
+- normalized image and inspection-receipt identities.
+
+The provenance source identity must equal the derived source record identity. Foreign identity encodings must translate exactly into their state-owned typed identities.
 
 ## Non-authorities
 
-The adapter does not execute a build, inspect archive bytes, mutate a target,
-construct planner candidates, publish state, or recover missing evidence. It
-exports disagreement rather than choosing between authorities.
+The adapter does not execute a build, inspect archive bytes, compare payload entries, mutate a target, construct planner candidates, publish state, or recover missing evidence. It exports disagreement rather than choosing between authorities.
 
 ## Failure translation
 
-The boundary translates only typed source-admission and `libpkgstate` model
-refusals. Allocation, logic, and unrelated runtime failures retain their native
-type. In particular, the adapter must not classify every `std::exception` as an
-identity or artifact disagreement.
+The boundary translates only typed source-projection and identity-translation failures. Allocation, logic, and unrelated runtime failures retain their native type. In particular, the adapter must not classify every `std::exception` as a projection disagreement.
 
 ## Dependency placement
 
-`libpkgstate`, `libpkgbuild`, and `libpkgimage` are public because their types
-occur in installed declarations. `libpkgstate-source` is implementation-only:
-it derives the request-bound source record and remains private for shared
-consumers while being retained in the static link closure.
+`libpkgstate` and `libpkgbuild-image` are public because their types occur in installed declarations. `libpkgstate-source` is implementation-only: it derives the request-bound source record and remains private for shared consumers while being retained in the static link closure.
 
-The root commit records the exact 2.5.1 implementation and behavior test.
-The independent repository then removed the parallel source-record input and
-made request-bound source admission explicit without rewriting that extraction
-history.
+The root commit records the extracted implementation. The 3.0 authority reset removes its duplicated build/image proof without rewriting extraction history.

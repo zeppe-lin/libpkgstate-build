@@ -30,25 +30,19 @@ endif
 pkgconf = import('pkgconfig')
 libpkgstate_dep = dependency(
   'libpkgstate',
-  version: '>=3.0.0',
+  version: ['>=3.0.0', '<4.0.0'],
   required: true,
   static: want_static,
 )
-libpkgbuild_dep = dependency(
-  'libpkgbuild',
-  version: '>=2.0.0',
-  required: true,
-  static: want_static,
-)
-libpkgimage_dep = dependency(
-  'libpkgimage',
-  version: '>=0.4.0',
+libpkgbuild_image_dep = dependency(
+  'libpkgbuild-image',
+  version: ['>=1.0.0', '<2.0.0'],
   required: true,
   static: want_static,
 )
 libpkgstate_source_dep = dependency(
   'libpkgstate-source',
-  version: '>=3.0.0',
+  version: ['>=3.0.0', '<4.0.0'],
   required: true,
   static: want_static,
 )

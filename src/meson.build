@@ -26,8 +26,7 @@ pkgstate_build = library(
   include_directories: public_inc,
   dependencies: [
     libpkgstate_dep,
-    libpkgbuild_dep,
-    libpkgimage_dep,
+    libpkgbuild_image_dep,
     libpkgstate_source_dep,
   ],
   install: true,
@@ -36,8 +35,7 @@ pkgstate_build = library(
 )
 libpkgstate_build_consumer_deps = [
   libpkgstate_dep,
-  libpkgbuild_dep,
-  libpkgimage_dep,
+  libpkgbuild_image_dep,
 ]
 if want_static
   libpkgstate_build_consumer_deps += [libpkgstate_source_dep]
@@ -64,8 +62,12 @@ pkgconf.generate(
   subdirs: '.',
   requires: [
     'libpkgstate >= 3.0.0',
-    'libpkgbuild >= 2.0.0',
-    'libpkgimage >= 0.4.0',
+    'libpkgstate < 4.0.0',
+    'libpkgbuild-image >= 1.0.0',
+    'libpkgbuild-image < 2.0.0',
   ],
-  requires_private: ['libpkgstate-source >= 3.0.0'],
+  requires_private: [
+    'libpkgstate-source >= 3.0.0',
+    'libpkgstate-source < 4.0.0',
+  ],
 )

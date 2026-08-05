@@ -1,6 +1,6 @@
 # Contributing
 
-Changes must preserve the authority contract in `docs/architecture.md`: `request-bound successful build + inspected image -> build_authority`.
+Changes must preserve the authority contract in `docs/architecture.md`: `admitted build/image authority -> build_authority`.
 
 Do not move endpoint authority, orchestration, policy selection, discovery, execution, persistence, migration, retry, or compatibility import into this repository. A convenience that reacquires or infers missing authority is a boundary violation even when it reduces caller code.
 

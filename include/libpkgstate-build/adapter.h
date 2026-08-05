@@ -1,111 +1,68 @@
 // SPDX-FileCopyrightText: 2026 Alexandr Savca
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-/*!
- * \file adapter.h
- * \brief Admission of native build and image authority into installed state.
+/*! \file adapter.h
+ *  \brief Projection of admitted build/image authority into durable state.
  */
 #pragma once
 
 #include <libpkgstate-build/export.h>
 
 #include <cstdint>
+#include <memory>
 #include <stdexcept>
 #include <string>
 
-#include <libpkgbuild/result.h>
-#include <libpkgimage/inspection_receipt.h>
+#include <libpkgbuild-image/authority.h>
 #include <libpkgstate/installed_control.h>
 #include <libpkgstate/package_source_record.h>
 
-/*! \brief Build-authority admission into the durable state vocabulary. */
+/*! \brief Build-authority projection into the durable state vocabulary. */
 namespace pkgstate::build_adapter {
 
 /*! \brief Stable reason that build-to-state projection was refused. */
 enum class projection_error_code : std::uint8_t {
-  build_result = 1,        //!< The build result was not complete and successful.
-  source_binding = 2,      //!< Request-bound source authority was inconsistent.
-  artifact_binding = 3,    //!< Artifact bytes and inspection evidence disagreed.
-  payload_mismatch = 4,    //!< Normalized image and ordered payload disagreed.
-  identity_translation = 5,//!< A foreign identity representation was invalid.
+  source_binding = 1,      //!< Request-bound source projection failed.
+  identity_translation = 2,//!< A foreign identity representation was invalid.
 };
 
 /*! \brief Typed build-to-state projection failure. */
 class PKGSTATE_BUILD_API projection_error final : public std::invalid_argument {
 public:
-  /*!
-   * \brief Construct a typed projection failure.
-   * \param code Stable refusal category.
-   * \param message Human-readable diagnostic text.
-   */
   projection_error(projection_error_code code, std::string message);
-
-  /*! \brief Destroy the polymorphic projection failure. */
   ~projection_error() override;
-
-  /*!
-   * \brief Return the stable refusal category.
-  *  \return The stable refusal category.
-   */
   [[nodiscard]] projection_error_code code() const noexcept;
 
 private:
   projection_error_code code_;
 };
 
-/*!
- * \brief Source-bound build authority admitted by this adapter.
- *
- * The value keeps the exact durable source projection beside the build
- * provenance derived from the same request. Callers cannot combine provenance
- * with another source record after admission.
- */
+/*! \brief Durable source and provenance projected from one admitted build image. */
 class PKGSTATE_BUILD_API build_authority final {
 public:
-  /*!
-   * \brief Return the request-bound durable source record.
-  *  \return The request-bound durable source record.
-   */
+  build_authority(const build_authority&) noexcept;
+  build_authority(build_authority&&) noexcept;
+  build_authority& operator=(const build_authority&) noexcept;
+  build_authority& operator=(build_authority&&) noexcept;
+  ~build_authority();
+
   [[nodiscard]] const package_source_record& source() const noexcept;
-  /*!
-   * \brief Return the exact admitted build provenance.
-  *  \return The exact admitted build provenance.
-   */
   [[nodiscard]] const build_provenance& provenance() const noexcept;
 
 private:
-  build_authority(package_source_record source,
-                  build_provenance provenance);
-
-  package_source_record source_;
-  build_provenance provenance_;
+  struct impl;
+  explicit build_authority(std::shared_ptr<const impl> value);
+  std::shared_ptr<const impl> impl_;
 
   friend PKGSTATE_BUILD_API build_authority project_build(
-      const pkgbuild::build_result& build,
-      const pkgimage::inspected_package_image& image);
+      const pkgbuild::image_adapter::build_image_authority& authority);
 };
 
-/*!
- * \brief Retain one verified successful build as native state provenance.
- *
- * Source authority is derived only from the sealed source snapshot and exact
- * architecture selections retained by the build request. The independently
- * inspected image must name the exact artifact bytes and equal the complete
- * ordered build payload, including kind-specific metadata and content.
- *
- * No parallel caller-supplied source record is accepted. The function performs
- * no build execution, planner projection, filesystem application, target
- * observation, or state publication.
- *
- * \param build Complete native build result.
- * \param image Independent inspection of the exact produced artifact.
- * \return Source-bound durable build authority.
- * \throws projection_error when the build is incomplete, request-bound source
- * projection fails, artifact evidence disagrees, payload/image facts differ,
- * or a foreign identity cannot be translated.
+/*! \brief Project one already admitted successful build/image pair into state.
+ *  \param authority Complete build/image admission owned by libpkgbuild-image.
+ *  \return Immutable durable source and build provenance projection.
  */
 [[nodiscard]] PKGSTATE_BUILD_API build_authority project_build(
-    const pkgbuild::build_result& build,
-    const pkgimage::inspected_package_image& image);
+    const pkgbuild::image_adapter::build_image_authority& authority);
 
 } // namespace pkgstate::build_adapter

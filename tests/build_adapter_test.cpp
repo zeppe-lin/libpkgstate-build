@@ -2,26 +2,27 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "build_fixture.h"
-#include "native_fixture.h"
 #include "test.h"
 
 #include <libpkgstate-build/adapter.h>
+
+#include <utility>
 
 namespace {
 
 void retains_complete_build_authority()
 {
-  const pkgbuild::build_result build = build_fixture::result();
-  const pkgimage::inspected_package_image image = build_fixture::inspected();
+  const auto admitted = build_fixture::admitted();
   const pkgstate::build_adapter::build_authority authority =
-      pkgstate::build_adapter::project_build(build, image);
+      pkgstate::build_adapter::project_build(admitted);
+  const pkgbuild::build_result& build = admitted.build();
+  const pkgimage::inspected_package_image& image = admitted.image();
   const pkgstate::build_provenance& provenance = authority.provenance();
-  TEST_EQ(authority.source(), build_fixture::state_source());
 
+  TEST_EQ(authority.source(), build_fixture::state_source());
+  TEST_EQ(provenance.source_record(), authority.source().identity());
   TEST_EQ(provenance.request().string(),
           "v1:sha256:" + build.request().identity().hex());
-  TEST_EQ(provenance.source_materials().string(),
-          "v1:sha256:" + build.request().sources().identity().hex());
   TEST_EQ(provenance.build_inputs().string(),
           "v1:sha256:" + build.request().inputs().identity().hex());
   TEST_EQ(provenance.environment_policy().string(),
@@ -41,32 +42,24 @@ void retains_complete_build_authority()
           "v1:sha256:" + build.artifact_binding()->hex());
   TEST_EQ(provenance.execution_evidence().string(),
           "v1:sha256:" + build.execution_evidence().hex());
+  TEST_EQ(provenance.build_image().string(),
+          "v1:sha256:" + admitted.identity().hex());
   TEST_EQ(provenance.artifact_image().string(),
           image.image().identity().string());
   TEST_EQ(provenance.artifact_inspection().string(),
           image.receipt().identity().string());
 }
 
-void rejects_failed_or_incomplete_builds()
+void preserves_opaque_value_semantics()
 {
-  const pkgbuild::build_result failed = pkgbuild::build_result::failed(
-      build_fixture::request(),
-      pkgbuild::execution_evidence_identity::from_sha256(std::string(64, '7')),
-      pkgbuild::failure_evidence_identity::from_sha256(std::string(64, '8')));
-  TEST_THROWS(pkgstate::build_adapter::projection_error,
-              pkgstate::build_adapter::project_build(
-                  failed, build_fixture::inspected()));
-}
-
-void rejects_mismatched_authorities()
-{
-  TEST_THROWS(pkgstate::build_adapter::projection_error,
-              pkgstate::build_adapter::project_build(
-                  build_fixture::result(), build_fixture::inspected('2')));
-
-  TEST_THROWS(pkgstate::build_adapter::projection_error,
-              pkgstate::build_adapter::project_build(
-                  build_fixture::result(), build_fixture::inspected('1', 0644)));
+  const auto admitted = build_fixture::admitted();
+  const auto first = pkgstate::build_adapter::project_build(admitted);
+  const auto copied = first;
+  auto moved = copied;
+  auto assigned = first;
+  assigned = std::move(moved);
+  TEST_EQ(assigned.source(), first.source());
+  TEST_EQ(assigned.provenance(), first.provenance());
 }
 
 } // namespace
@@ -74,6 +67,5 @@ void rejects_mismatched_authorities()
 int main()
 {
   retains_complete_build_authority();
-  rejects_failed_or_incomplete_builds();
-  rejects_mismatched_authorities();
+  preserves_opaque_value_semantics();
 }

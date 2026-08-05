@@ -6,11 +6,15 @@ set -eu
 library=$1
 [ -s "$library" ] || { echo "shared-boundary-audit: missing $library" >&2; exit 1; }
 output=$(readelf -d "$library")
-printf '%s\n' "$output"
-printf '%s\n' "$output" | grep -F 'Library soname: [libpkgstate-build.so.1]' >/dev/null || { echo 'shared-boundary-audit: wrong SONAME' >&2; exit 1; }
-needed=$(printf '%s\n' "$output" | grep 'Shared library:' || true)
-printf '%s\n' "$needed" | grep -F 'Shared library: [libpkgstate.so.4]' >/dev/null || { echo 'shared-boundary-audit: missing libpkgstate.so.4' >&2; exit 1; }
-printf '%s\n' "$needed" | grep -F 'Shared library: [libpkgbuild.so.3]' >/dev/null || { echo 'shared-boundary-audit: missing libpkgbuild.so.3' >&2; exit 1; }
-printf '%s\n' "$needed" | grep -F 'Shared library: [libpkgimage.so.1]' >/dev/null || { echo 'shared-boundary-audit: missing libpkgimage.so.1' >&2; exit 1; }
-printf '%s\n' "$needed" | grep -F 'Shared library: [libpkgstate-source.so.1]' >/dev/null || { echo 'shared-boundary-audit: missing libpkgstate-source.so.1' >&2; exit 1; }
-if printf '%s\n' "$needed" | grep -E 'libpkgplan|libpkgapply|libpkgsource\.so|libpkgstate-(plan|apply)|libcrypto|libarchive|libyaml' >/dev/null; then echo 'shared-boundary-audit: forbidden direct dependency' >&2; exit 1; fi
+printf '%s
+' "$output"
+printf '%s
+' "$output" | grep -F 'Library soname: [libpkgstate-build.so.1]' >/dev/null || { echo 'shared-boundary-audit: wrong SONAME' >&2; exit 1; }
+needed=$(printf '%s
+' "$output" | grep 'Shared library:' || true)
+for library_name in libpkgstate.so.4 libpkgbuild-image.so.1 libpkgstate-source.so.1 libpkgbuild.so.4 libpkgimage.so.1; do
+  printf '%s
+' "$needed" | grep -F "Shared library: [$library_name]" >/dev/null || { echo "shared-boundary-audit: missing $library_name" >&2; exit 1; }
+done
+if printf '%s
+' "$needed" | grep -E 'libpkgplan|libpkgapply|libpkgsource\.so|libpkgstate-(plan|apply)|libcrypto|libarchive|libyaml' >/dev/null; then echo 'shared-boundary-audit: forbidden direct dependency' >&2; exit 1; fi
