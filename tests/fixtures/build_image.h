@@ -8,7 +8,6 @@
 #include <libpkgcatalog/libpkgcatalog.h>
 #include <libpkgresolve/libpkgresolve.h>
 #include <libpkgstate/libpkgstate.h>
-#include <libpkgstate-source/adapter.h>
 
 #include <cstdint>
 #include <optional>
@@ -160,17 +159,19 @@ inline const pkgresolve::selected_package& subject(
   throw std::runtime_error("fixture resolution lacks example subject");
 }
 
-inline pkgbuild::build_policy policy()
+inline pkgbuild::build_policy policy(std::uint32_t parallelism = 4)
 {
   return pkgbuild::build_policy::make(
-      pkgbuild::environment_policy::hermetic(4, 0022, 1700000000));
+      pkgbuild::environment_policy::hermetic(
+          parallelism, 0022, 1700000000));
 }
 
-inline pkgbuild::build_request request()
+inline pkgbuild::build_request request(
+    pkgbuild::build_policy selected_policy = policy())
 {
   auto resolved = resolution();
   return pkgbuild::build_request::seal(
-      resolved, subject(resolved).identity(), policy());
+      resolved, subject(resolved).identity(), std::move(selected_policy));
 }
 
 inline pkgbuild::payload_manifest payload()
@@ -199,11 +200,12 @@ inline pkgbuild::sealed_artifact artifact(char seed = '1')
       pkgbuild::sha256_digest(std::string(64, seed)));
 }
 
-
-inline pkgbuild::build_result result()
+inline pkgbuild::build_result result(
+    pkgbuild::build_policy selected_policy = policy(),
+    char artifact_seed = '1')
 {
   return pkgbuild::build_result::succeeded(
-      request(), payload(), artifact(),
+      request(std::move(selected_policy)), payload(), artifact(artifact_seed),
       pkgbuild::execution_evidence_identity::from_sha256(
           std::string(64, '9')));
 }
@@ -260,20 +262,24 @@ inline pkgimage::inspected_package_image inspected(
       std::move(value), std::move(receipt));
 }
 
-inline pkgbuild::image_adapter::build_image_authority admitted()
+inline pkgbuild::image_adapter::build_image_authority admitted(
+    pkgbuild::build_policy selected_policy = policy(),
+    char artifact_seed = '1')
 {
-  const auto build = result();
-  const auto image_value = inspected();
+  const auto build = result(std::move(selected_policy), artifact_seed);
+  const auto image_value = inspected(artifact_seed);
   return pkgbuild::image_adapter::build_image_authority::admit(
       build, image_value);
 }
 
-inline pkgstate::package_source_record state_source()
+inline pkgbuild::image_adapter::build_image_authority restored(
+    pkgbuild::build_policy selected_policy = policy(),
+    char artifact_seed = '1')
 {
-  const auto snapshot = request().source();
-  return pkgstate::source_adapter::project_source(
-      snapshot, pkgsource::architecture_reference("x86_64"),
-      pkgsource::architecture_reference("x86_64"));
+  const auto build = result(std::move(selected_policy), artifact_seed);
+  const auto receipt = inspected(artifact_seed).receipt();
+  return pkgbuild::image_adapter::build_image_authority::restore(
+      build, receipt);
 }
 
 } // namespace build_fixture
